@@ -1,14 +1,14 @@
 ---
 title: "Statistics Inference Assignment - 1"
 author: "Liu Lee"
-date: 24/10/2014
+date: "24/10/2014"
 output:
+  html_document:
+    highlight: zenburn
+    theme: cosmo
   pdf_document:
     highlight: zenburn
     toc: yes
-  html_document:
-    highlight: pygments
-    theme: cosmo
   word_document: default
 ---
 ***Details : This PDF contains all mathematical calculation and graph required to answer questions for assignment 1***
