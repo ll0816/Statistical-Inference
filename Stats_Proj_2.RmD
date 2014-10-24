@@ -1,0 +1,97 @@
+---
+title: "Statistics Inference Assignment - 2"
+author: "Liu Lee"
+date: 24/10/2014
+output:
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+  html_document:
+    highlight: pygments
+    theme: cosmo
+  word_document: default
+---
+  
+***Details : This PDF contains solution and graph required to answer questions for assignment 2***
+
+### Problem Statement - Statistics Inference 2
+
+Now in the second portion of the class, we're going to analyze the ToothGrowth data in the R datasets package. 
+1. Load the ToothGrowth data and perform some basic exploratory data analyses 
+
+2. Provide a basic summary of the data.
+
+3. Use confidence intervals and hypothesis tests to compare tooth growth by supp and dose. (Use the techniques from class even if there's other approaches worth considering)
+
+4. State your conclusions and the assumptions needed for your conclusions.
+
+### Load Data 
+
+```{r}
+data(ToothGrowth)
+head(ToothGrowth)
+```
+
+### Solution for Q1
+```{r}
+require(ggplot2)
+g1 <- ggplot(ToothGrowth, aes(x = factor(dose), y = len,fill = factor(dose)))
+g1 + geom_boxplot() + facet_grid(.~supp) + 
+    scale_x_discrete("Dosage in mg") + 
+    scale_y_continuous("Length of Teeth") + 
+    ggtitle("Exploratory Data Analysis")
+
+```
+
+### Solution for Q2 
+Basic summary of the data.
+
+```{r}
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+summary(ToothGrowth)
+table(ToothGrowth$supp, ToothGrowth$dose)
+```
+
+### Solution for Q3
+We perform Null Hypothesis Test
+```{r}
+supp.t1 <- t.test(len ~ supp, paired = F, var.equal = T, data = ToothGrowth)
+supp.t2 <- t.test(len~supp, paired = F, var.equal = F, data = ToothGrowth)
+supp.result <- data.frame("p-value" = c(supp.t1$p.value, supp.t2$p.value),"Conf-Low" = c(supp.t1$conf[1],supp.t2$conf[1]),
+                          "Conf-High" = c(supp.t1$conf[2],supp.t2$conf[2]), row.names = c("Equal Var","Unequal Var"))
+supp.result
+```
+
+p-values for both equal and unequal variance t test > 5%. We can neither accept nor reject the Null hypothesis. So it is not clear that the difference exists between OJ and VC groups.
+
+```{r}
+dose.05 <- ToothGrowth[which(ToothGrowth$dose == .5),1]
+dose.10 <- ToothGrowth[which(ToothGrowth$dose == 1),1]
+dose.20 <- ToothGrowth[which(ToothGrowth$dose == 2),1]
+dose0510.t1 <- t.test(dose.05, dose.10, paired = F, var.equal = T)
+dose0510.t2 <- t.test(dose.05, dose.10, paired = F, var.equal = F)
+dose0510.result <- data.frame("p-value" = c(dose0510.t1$p.value, dose0510.t2$p.value),"Conf-Low" = c(dose0510.t1$conf[1],dose0510.t2$conf[1]),"Conf-High" = c(dose0510.t1$conf[2],dose0510.t2$conf[2]), row.names = c("Equal Var","Unequal Var"), "Dose" = "0.5 to 1")
+dose0520.t1 <- t.test(dose.05, dose.20, paired = F, var.equal = T)
+dose0520.t2 <- t.test(dose.05, dose.20, paired = F, var.equal = F)
+dose0520.result <- data.frame("p-value" = c(dose0520.t1$p.value, dose0520.t2$p.value),"Conf-Low" = c(dose0520.t1$conf[1],dose0520.t2$conf[1]),"Conf-High" = c(dose0520.t1$conf[2],dose0520.t2$conf[2]), row.names = c("Equal Var","Unequal Var"), "Dose" = "0.5 to 2")
+dose1020.t1 <- t.test(dose.10, dose.20, paired = F, var.equal = T)
+dose1020.t2 <- t.test(dose.10, dose.20, paired = F, var.equal = F)
+dose1020.result <- data.frame("p-value" = c(dose1020.t1$p.value, dose1020.t2$p.value),"Conf-Low" = c(dose1020.t1$conf[1],dose1020.t2$conf[1]),"Conf-High" = c(dose1020.t1$conf[2],dose1020.t2$conf[2]), row.names = c("Equal Var","Unequal Var"), "Dose" = "1 to 2")
+dose.result <- rbind(dose0510.result,dose0520.result,dose1020.result)
+dose.result
+```
+Above table shows that dosages significantly impacts tooth growth. 
+
+1. p-values are very small.
+
+2. Confidence interval donot contain 0
+
+So, we can reject the null hypothesis and state that higher dosage tends to result in higher tooth length
+
+
+### Solution Q4
+
+> We can conclude that across supplements for each dose :  
+1. 2mg dose has larger impact on tooth growth than 1mg and 0.5mg  
+2. 1mg dose has more impact than 0.5mg dose.   
+3. we cannot say that orange juice and vitamin C have obvious different impact on tooth growth
